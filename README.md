@@ -1,6 +1,6 @@
-# nginx-oqs
+# nginx-pqc
 
-This docker container provides an Nginx server with Open Quantum Safe (OQS) support.
+This docker container provides an Nginx server with support for a post-quantum key exchange.
 
 ## Usage
 
@@ -9,12 +9,12 @@ Below is a basic `docker-compose.yml` example to get you started:
 ```yaml
 services:
   nginx:
-    image: ghcr.io/printfn/nginx-oqs:latest
+    image: ghcr.io/printfn/nginx-pqc:latest
     command: [nginx, '-g', 'daemon off;']
     ports:
-      - "0.0.0.0:80:80"
-      - "0.0.0.0:443:443"
-      - "0.0.0.0:443:443/udp"
+      - "[::]:80:80"
+      - "[::]:443:443"
+      - "[::]:443:443/udp"
     volumes:
       - /path/to/your/nginx/conf/:/etc/nginx/:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
@@ -38,8 +38,8 @@ http {
   ssl_protocols TLSv1.3;
 
   server {
-    listen 0.0.0.0:443 quic reuseport;
-    listen 0.0.0.0:443 ssl;
+    listen [::]:443 quic reuseport;
+    listen [::]:443 ssl;
     server_name example.com;
 
     ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem;
@@ -56,10 +56,10 @@ http {
     http2 on;
     http3 on;
 
-    add_header Alt-Svc 'h3=":443"; ma=86400, h3-29=":443"; ma=86400' always;
+    add_header Alt-Svc 'h3=":443"; ma=86400' always;
 
     location / {
-      add_header Alt-Svc 'h3=":443"; ma=86400, h3-29=":443"; ma=86400' always;
+      add_header Alt-Svc 'h3=":443"; ma=86400' always;
     }
   }
 }
@@ -72,8 +72,3 @@ Use `curl` like so:
 ```sh
 curl -v --curves X25519MLKEM768 https://example.com
 ```
-
-## Links
-
-- [Open Quantum Safe](https://openquantumsafe.org/)
-- [Nginx](https://nginx.org/)
